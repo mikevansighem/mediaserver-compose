@@ -1,0 +1,54 @@
+version: "3.1"
+
+volumes:
+  mealie:
+  duplicati-config:
+  duplicati-backups:
+
+services:
+
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    container_name: duplicati
+    restart: unless-stopped
+    ports:
+      - 8200:8200
+    volumes:
+      - duplicati-config:/config
+      - duplicati-backups:/backups
+      - /:/source
+    environment:
+      - PUID=0
+      - PGID=0
+      - Europe/Amsterdam
+
+  filebrowser:
+    container_name: filebrowser
+    image: hurlenko/filebrowser
+    restart: always
+    ports:
+      - 443:8080
+    volumes:
+      - /:/data
+      - /CONFIG_DIR:/config
+    environment:
+      - FB_BASEURL=/filebrowser
+
+  mealie:
+    container_name: mealie
+    image: hkotel/mealie:latest
+    restart: always
+    ports:
+      - 9925:80
+    volumes:
+      - mealie:/app/data
+    environment:
+      PUID: 0
+      PGID: 0
+      TZ: Europe/Amsterdam
+      RECIPE_PUBLIC: 'true'
+      RECIPE_SHOW_NUTRITION: 'false'
+      RECIPE_SHOW_ASSETS: 'true'
+      RECIPE_LANDSCAPE_VIEW: 'true'
+      RECIPE_DISABLE_COMMENTS: 'false'
+      RECIPE_DISABLE_AMOUNT: 'false'
